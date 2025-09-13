@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import { type Candidate, type Internship } from "@shared/schema";
+import { type Candidate, type Internship, type InternshipMatch } from "@shared/schema";
 
 const ai = new GoogleGenAI({ 
   apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY || "" 
@@ -191,5 +191,111 @@ export async function generateMatchExplanation(
       return "यह इंटर्नशिप आपके कौशल और करियर लक्ष्यों के साथ मेल खाता है और मूल्यवान अनुभव प्रदान करता है।";
     }
     return "This internship offers valuable experience that aligns with your skills and career goals.";
+  }
+}
+
+
+// New function for ranking multiple internships at once (more efficient)
+export async function rankInternships(
+  candidate: Candidate,
+  internships: Internship[]
+): Promise<InternshipMatch[]> {
+  try {
+    const systemPrompt = `You are an expert career counselor and internship matching specialist.
+
+Your task is to analyze a candidate's profile against multiple internship opportunities and rank them by match quality.
+
+For each internship, provide:
+1. A match percentage (0-100) based on skill overlap, location compatibility, education level, and sector alignment
+2. A concise explanation (max 100 characters) of why this internship matches
+
+Scoring Guidelines:
+- Skills match (40%): How well candidate's skills align with required skills
+- Location compatibility (25%): Geographic preference alignment or remote work options
+- Education level (20%): Whether candidate meets education requirements  
+- Sector interest (15%): How well the internship aligns with candidate's sector preferences
+
+Return results sorted by match percentage in descending order.
+Respond with JSON array in this exact format:
+[{"internshipId": "string", "matchPercentage": number, "explanation": "string"}]`;
+
+    const candidateProfile = `
+Candidate Profile:
+- Education: ${candidate.education}
+- Skills: ${candidate.skills.join(', ')}
+- Sector Interests: ${candidate.sectors.join(', ')}
+- Location Preferences: ${candidate.locations.join(', ')}`;
+
+    const internshipList = internships.map((internship, index) => `
+${index + 1}. ID: ${internship.id}
+   Title: ${internship.title}
+   Company: ${internship.company}
+   Location: ${internship.location}
+   Required Skills: ${internship.skills.slice(0, 5).join(', ')}
+   Sector: ${internship.sector || 'General'}`).join('');
+
+    const prompt = `${candidateProfile}
+
+Internship Opportunities:${internshipList}
+
+Analyze and rank these internships for the candidate.`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-pro",
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              internshipId: { type: "string" },
+              matchPercentage: { 
+                type: "number",
+                minimum: 0,
+                maximum: 100
+              },
+              explanation: { type: "string" }
+            },
+            required: ["internshipId", "matchPercentage", "explanation"]
+          }
+        }
+      },
+      contents: [{ role: "user", parts: [{ text: prompt }] }]
+    });
+
+    const result = response.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!result) {
+      throw new Error('No response from Gemini API');
+    }
+
+    const rankings = JSON.parse(result) as Array<{
+      internshipId: string;
+      matchPercentage: number;
+      explanation: string;
+    }>;
+
+    // Map back to InternshipMatch format
+    const internshipMap = new Map(internships.map(i => [i.id, i]));
+    const matches: InternshipMatch[] = [];
+
+    for (const ranking of rankings) {
+      const internship = internshipMap.get(ranking.internshipId);
+      if (internship) {
+        matches.push({
+          internship,
+          matchPercentage: ranking.matchPercentage,
+          aiExplanation: ranking.explanation
+        });
+      }
+    }
+
+    console.log(`Gemini ranked ${matches.length} internships successfully`);
+    return matches;
+
+  } catch (error) {
+    console.error('Error ranking internships with Gemini:', error);
+    throw error;
   }
 }

@@ -1,42 +1,49 @@
 import { type Candidate, type Internship, type InternshipMatch } from '@shared/schema';
-import { generateInternshipMatch } from './gemini';
+import { rankInternships } from './gemini';
 
 export class MatchingService {
   
   async findMatches(candidate: Candidate, internships: Internship[]): Promise<InternshipMatch[]> {
-    const matches: InternshipMatch[] = [];
+    // First pass: Rule-based filtering to get shortlist
+    const shortlistMatches: Array<{internship: Internship, basicScore: number, explanation: string}> = [];
     
     for (const internship of internships) {
-      try {
-        const matchData = await generateInternshipMatch(candidate, internship);
-        
-        if (matchData && matchData.matchPercentage >= 60) { // Only include matches above 60%
-          matches.push({
-            internship,
-            matchPercentage: matchData.matchPercentage,
-            aiExplanation: matchData.explanation
-          });
-        }
-      } catch (error) {
-        console.error(`Error generating match for internship ${internship.id}:`, error);
-        // Fallback to basic matching if AI fails
-        const basicMatch = this.calculateBasicMatch(candidate, internship);
-        if (basicMatch.matchPercentage >= 60) {
-          matches.push({
-            internship,
-            matchPercentage: basicMatch.matchPercentage,
-            aiExplanation: basicMatch.explanation
-          });
-        }
+      const basicMatch = this.calculateBasicMatch(candidate, internship);
+      if (basicMatch.matchPercentage >= 50) { // Lower threshold for shortlisting
+        shortlistMatches.push({
+          internship,
+          basicScore: basicMatch.matchPercentage,
+          explanation: basicMatch.explanation
+        });
       }
     }
     
-    // Sort by match percentage descending and return at least 5 matches
-    const sortedMatches = matches
-      .sort((a, b) => b.matchPercentage - a.matchPercentage);
+    // Sort by basic score and take top 20 for Gemini ranking
+    const sortedShortlist = shortlistMatches
+      .sort((a, b) => b.basicScore - a.basicScore)
+      .slice(0, 20);
     
-    // Return at least 5 matches, more if available and high quality
-    return sortedMatches.slice(0, Math.max(5, sortedMatches.length));
+    console.log(`Filtered ${internships.length} internships to ${sortedShortlist.length} for AI ranking`);
+    
+    try {
+      // Second pass: Use Gemini to rank the shortlist
+      const rankedResults = await rankInternships(candidate, sortedShortlist.map(m => m.internship));
+      
+      if (rankedResults && rankedResults.length > 0) {
+        return rankedResults.slice(0, 10); // Return top 10 AI-ranked matches
+      }
+    } catch (error) {
+      console.error('Error using Gemini for ranking, falling back to basic matching:', error);
+    }
+    
+    // Fallback: Return basic matches if Gemini fails
+    const fallbackMatches = sortedShortlist.slice(0, 10).map(match => ({
+      internship: match.internship,
+      matchPercentage: match.basicScore,
+      aiExplanation: match.explanation
+    }));
+    
+    return fallbackMatches;
   }
 
   private calculateBasicMatch(candidate: Candidate, internship: Internship): { matchPercentage: number; explanation: string } {

@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { GraduationCap, Search, ArrowRight, RotateCcw, Loader2 } from "lucide-react";
-import CandidateForm from "@/components/CandidateForm";
+import MultiStepForm from "@/components/MultiStepForm";
 import InternshipCard from "@/components/InternshipCard";
 import LanguageToggle from "@/components/LanguageToggle";
 import { apiRequest } from "@/lib/queryClient";
@@ -112,7 +112,7 @@ export default function Home() {
 
         {/* Form Section */}
         {viewState === 'form' && (
-          <CandidateForm 
+          <MultiStepForm 
             onSubmit={handleFormSubmit}
             language={language}
             onBack={() => setViewState('welcome')}
@@ -137,16 +137,43 @@ export default function Home() {
         {/* Results Section */}
         {viewState === 'results' && (
           <section>
+            {/* Step Indicator */}
             <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-blue-600 font-medium">Step 3 of 3</span>
+                <span className="text-sm text-gray-500">Recommendations Ready</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="bg-blue-600 h-2 rounded-full" style={{width: '100%'}} />
+              </div>
+            </div>
+            
+            {/* Header */}
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 {t.yourMatches}
               </h2>
-              <p className="text-gray-600">
+              <p className="text-gray-600 mb-4">
                 {t.basedOnProfile}
               </p>
+              
+              {/* Filter and Count */}
+              <div className="flex items-center justify-between">
+                <div className="flex space-x-2">
+                  <Button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                    All Matches
+                  </Button>
+                  <Button variant="outline" className="border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm">
+                    90%+ Match
+                  </Button>
+                </div>
+                <span className="text-sm text-gray-500">
+                  Showing {matches.length} of {matches.length} matches
+                </span>
+              </div>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4">
               {matches.map((match, index) => (
                 <InternshipCard 
                   key={`${match.internship.id}-${index}`}
