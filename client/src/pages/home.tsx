@@ -70,46 +70,43 @@ export default function Home() {
   const t = translations[language];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-primary text-primary-foreground shadow-lg sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 backdrop-blur-md bg-white/90">
+        <div className="container mx-auto px-6 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <GraduationCap className="h-6 w-6" />
-              <div>
-                <h1 className="text-lg font-bold">{t.title}</h1>
-                <p className="text-xs opacity-90">{t.subtitle}</p>
-              </div>
+            <div className="flex items-center space-x-2">
+              <GraduationCap className="h-5 w-5 text-blue-600" />
+              <h1 className="text-xl font-semibold text-gray-900">{t.title}</h1>
             </div>
             <LanguageToggle language={language} onToggle={setLanguage} />
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6 max-w-4xl">
+      <main className="container mx-auto px-6 py-8 max-w-3xl">
         {/* Welcome Section */}
         {viewState === 'welcome' && (
-          <section className="text-center mb-8">
-            <Card>
-              <CardContent className="p-6">
-                <Search className="h-12 w-12 text-primary mx-auto mb-4" />
-                <h2 className="text-2xl font-bold text-foreground mb-3">
-                  {t.findPerfectInternship}
-                </h2>
-                <p className="text-muted-foreground mb-6 leading-relaxed">
-                  {t.answerQuestions}
-                </p>
-                <Button 
-                  onClick={() => setViewState('form')}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                  data-testid="button-start-matching"
-                >
-                  <ArrowRight className="h-4 w-4 mr-2" />
-                  {t.startMatching}
-                </Button>
-              </CardContent>
-            </Card>
+          <section className="text-center py-16">
+            <div className="max-w-md mx-auto">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Search className="h-8 w-8 text-blue-600" />
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                {t.findPerfectInternship}
+              </h2>
+              <p className="text-gray-600 mb-8 text-lg">
+                {t.answerQuestions}
+              </p>
+              <Button 
+                onClick={() => setViewState('form')}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-base font-medium"
+                data-testid="button-start-matching"
+              >
+                {t.startMatching}
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
           </section>
         )}
 
@@ -124,34 +121,32 @@ export default function Home() {
 
         {/* Loading Section */}
         {viewState === 'loading' && (
-          <section className="text-center py-12">
-            <Card>
-              <CardContent className="p-8">
-                <Loader2 className="h-12 w-12 text-primary mx-auto mb-4 animate-spin" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  {t.findingMatches}
-                </h3>
-                <p className="text-muted-foreground">
-                  {t.usingAI}
-                </p>
-              </CardContent>
-            </Card>
+          <section className="text-center py-20">
+            <div className="max-w-md mx-auto">
+              <Loader2 className="h-12 w-12 text-blue-600 mx-auto mb-6 animate-spin" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                {t.findingMatches}
+              </h3>
+              <p className="text-gray-600">
+                {t.usingAI}
+              </p>
+            </div>
           </section>
         )}
 
         {/* Results Section */}
         {viewState === 'results' && (
           <section>
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-foreground mb-2">
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">
                 {t.yourMatches}
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-gray-600">
                 {t.basedOnProfile}
               </p>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
               {matches.map((match, index) => (
                 <InternshipCard 
                   key={`${match.internship.id}-${index}`}

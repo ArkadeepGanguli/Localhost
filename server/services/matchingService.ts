@@ -76,10 +76,7 @@ export class MatchingService {
     
     const matchPercentage = Math.round((totalScore / maxScore) * 100);
     
-    const explanation = `This role matches ${matchingSkills.length} of your key skills` +
-      (locationMatch ? ` and aligns with your location preferences` : '') +
-      (sectorMatch ? ` in your preferred sector` : '') +
-      `. It offers relevant experience for your career goals.`;
+    const explanation = `${matchingSkills.length} matching skills${locationMatch ? ', location fit' : ''}${sectorMatch ? ', sector match' : ''}.`;
     
     return { matchPercentage, explanation };
   }

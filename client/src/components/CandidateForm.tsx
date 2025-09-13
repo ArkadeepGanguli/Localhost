@@ -12,7 +12,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Search, X } from "lucide-react";
+import { Search, X, ArrowLeft } from "lucide-react";
 import { type CandidateFormData } from "@shared/schema";
 
 interface CandidateFormProps {
@@ -35,17 +35,30 @@ export default function CandidateForm({ onSubmit, language, onBack }: CandidateF
   const [skillsSearch, setSkillsSearch] = useState('');
   const [locationPreference, setLocationPreference] = useState<'any' | 'remote' | 'specific'>('any');
   const [showSkillsDropdown, setShowSkillsDropdown] = useState(false);
+  const [locationsSearch, setLocationsSearch] = useState('');
+  const [showLocationsDropdown, setShowLocationsDropdown] = useState(false);
 
   // Fetch available skills
   const { data: skillsData } = useQuery<{ skills: string[] }>({
     queryKey: ['/api/skills'],
   });
 
+  // Fetch available locations
+  const { data: locationsData } = useQuery<{ locations: string[] }>({
+    queryKey: ['/api/locations'],
+  });
+
   const availableSkills = skillsData?.skills || [];
+  const availableLocations = locationsData?.locations || [];
 
   const filteredSkills = availableSkills.filter((skill: string) =>
     skill.toLowerCase().includes(skillsSearch.toLowerCase()) &&
     !formData.skills.includes(skill)
+  );
+
+  const filteredLocations = availableLocations.filter((location: string) =>
+    location.toLowerCase().includes(locationsSearch.toLowerCase()) &&
+    !formData.locations.includes(location)
   );
 
   const translations = {
@@ -63,7 +76,9 @@ export default function CandidateForm({ onSubmit, language, onBack }: CandidateF
       remoteWork: "Remote Work", 
       specificLocations: "Specific Locations",
       specificLocationsHint: "Select 'Specific Locations' to choose cities",
+      locationsPlaceholder: "Search and select locations...",
       findMyMatches: "Find My Matches",
+      back: "Back",
       twelthPass: "12th Pass / Intermediate",
       undergraduate: "Bachelor's Degree",
       postgraduate: "Master's Degree",
@@ -94,7 +109,9 @@ export default function CandidateForm({ onSubmit, language, onBack }: CandidateF
       remoteWork: "रिमोट कार्य",
       specificLocations: "विशिष्ट स्थान",
       specificLocationsHint: "शहर चुनने के लिए 'विशिष्ट स्थान' चुनें",
+      locationsPlaceholder: "स्थान खोजें और चुनें...",
       findMyMatches: "मेरे मैच खोजें",
+      back: "वापस",
       twelthPass: "12वीं पास / इंटरमीडिएट", 
       undergraduate: "स्नातक की डिग्री",
       postgraduate: "स्नातकोत्तर की डिग्री",
@@ -146,6 +163,24 @@ export default function CandidateForm({ onSubmit, language, onBack }: CandidateF
     }));
   };
 
+  const handleLocationAdd = (location: string) => {
+    if (!formData.locations.includes(location)) {
+      setFormData(prev => ({
+        ...prev,
+        locations: [...prev.locations, location]
+      }));
+      setLocationsSearch('');
+      setShowLocationsDropdown(false);
+    }
+  };
+
+  const handleLocationRemove = (locationToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      locations: prev.locations.filter(location => location !== locationToRemove)
+    }));
+  };
+
   const handleSectorChange = (sector: string) => {
     setFormData(prev => ({
       ...prev,
@@ -167,6 +202,9 @@ export default function CandidateForm({ onSubmit, language, onBack }: CandidateF
       locations = ['Remote'];
     }
     // For specific locations, keep current selections or empty array
+    else {
+      locations = formData.locations.filter(loc => loc !== 'Any Location' && loc !== 'Remote');
+    }
     
     setFormData(prev => ({
       ...prev,
@@ -192,48 +230,51 @@ export default function CandidateForm({ onSubmit, language, onBack }: CandidateF
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-background">
-      <div className="space-y-8">
-        {/* Name and Email - Two Column Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="fullName" className="text-sm font-medium text-foreground">
-              {t.fullName}
-            </Label>
+    <div className="max-w-2xl mx-auto">
+      <div className="bg-white rounded-2xl p-8 space-y-6">
+        {/* Back Button */}
+        <div className="flex items-center mb-4">
+          <Button
+            onClick={onBack}
+            variant="ghost"
+            className="text-gray-600 hover:text-gray-800 p-2 -ml-2"
+            data-testid="button-back"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            {t.back}
+          </Button>
+        </div>
+        {/* Name and Email */}
+        <div className="space-y-4">
+          <div>
             <Input
               id="fullName"
               type="text"
               placeholder={t.fullNamePlaceholder}
               value={formData.fullName}
               onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-              className="h-12 bg-muted/30 border-border"
+              className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               data-testid="input-fullname"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium text-foreground">
-              {t.emailAddress}
-            </Label>
+          <div>
             <Input
               id="email"
               type="email"
               placeholder={t.emailPlaceholder}
               value={formData.email}
               onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-              className="h-12 bg-muted/30 border-border"
+              className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               data-testid="input-email"
             />
           </div>
         </div>
 
         {/* Education Level */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-foreground">
-            {t.educationLevel}
-          </Label>
+        <div>
           <Select value={formData.education} onValueChange={(value) => setFormData(prev => ({ ...prev, education: value }))}>
-            <SelectTrigger className="h-12 bg-muted/30 border-border" data-testid="select-education">
-              <SelectValue placeholder="Bachelor's Degree" />
+            <SelectTrigger className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500" data-testid="select-education">
+              <SelectValue placeholder={t.educationLevel} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="12th-pass">{t.twelthPass}</SelectItem>
@@ -243,36 +284,31 @@ export default function CandidateForm({ onSubmit, language, onBack }: CandidateF
           </Select>
         </div>
 
-        {/* Skills & Expertise */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-foreground">
-            {t.skillsExpertise}
-          </Label>
+        {/* Skills */}
+        <div>
           <div className="relative">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                type="text"
-                placeholder={t.skillsPlaceholder}
-                value={skillsSearch}
-                onChange={(e) => {
-                  setSkillsSearch(e.target.value);
-                  setShowSkillsDropdown(e.target.value.length > 0);
-                }}
-                onFocus={() => setShowSkillsDropdown(skillsSearch.length > 0)}
-                className="h-12 pl-10 bg-muted/30 border-border"
-                data-testid="input-skills-search"
-              />
-            </div>
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              type="text"
+              placeholder={t.skillsPlaceholder}
+              value={skillsSearch}
+              onChange={(e) => {
+                setSkillsSearch(e.target.value);
+                setShowSkillsDropdown(e.target.value.length > 0);
+              }}
+              onFocus={() => setShowSkillsDropdown(skillsSearch.length > 0)}
+              className="h-12 pl-10 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+              data-testid="input-skills-search"
+            />
             
             {/* Skills Dropdown */}
             {showSkillsDropdown && filteredSkills.length > 0 && (
-              <div className="absolute top-full left-0 right-0 bg-background border border-border rounded-md shadow-lg z-10 max-h-40 overflow-y-auto mt-1">
+              <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-40 overflow-y-auto mt-1">
                 {filteredSkills.slice(0, 10).map((skill) => (
                   <button
                     key={skill}
                     onClick={() => handleSkillAdd(skill)}
-                    className="w-full px-3 py-2 text-left hover:bg-muted/50 text-sm"
+                    className="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm border-b border-gray-100 last:border-0"
                     data-testid={`option-skill-${skill.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     {skill}
@@ -286,95 +322,147 @@ export default function CandidateForm({ onSubmit, language, onBack }: CandidateF
           {formData.skills.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-3">
               {formData.skills.map((skill) => (
-                <div
+                <span
                   key={skill}
-                  className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                  className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2"
                   data-testid={`selected-skill-${skill.toLowerCase().replace(/\s+/g, '-')}`}
                 >
                   {skill}
                   <button
                     onClick={() => handleSkillRemove(skill)}
-                    className="hover:bg-primary/80 rounded-full p-0.5"
+                    className="hover:bg-blue-200 rounded-full p-0.5"
                     data-testid={`remove-skill-${skill.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     <X className="h-3 w-3" />
                   </button>
-                </div>
+                </span>
               ))}
             </div>
           )}
         </div>
 
-        {/* Sector Interests */}
-        <div className="space-y-4">
-          <Label className="text-sm font-medium text-foreground">
-            {t.sectorInterests}
-          </Label>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Sectors */}
+        <div>
+          <p className="text-sm font-medium text-gray-700 mb-3">{t.sectorInterests}</p>
+          <div className="grid grid-cols-2 gap-3">
             {sectorOptions.map((sector) => (
-              <div key={sector.value} className="flex items-center space-x-3">
+              <label
+                key={sector.value}
+                className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-colors ${
+                  formData.sectors.includes(sector.value)
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
                 <input
                   type="checkbox"
-                  id={sector.value}
                   checked={formData.sectors.includes(sector.value)}
                   onChange={() => handleSectorChange(sector.value)}
-                  className="w-4 h-4 text-primary bg-background border-2 border-border rounded focus:ring-primary focus:ring-2"
+                  className="sr-only"
                   data-testid={`checkbox-sector-${sector.value}`}
                 />
-                <Label
-                  htmlFor={sector.value}
-                  className="text-sm text-foreground cursor-pointer"
-                >
-                  {sector.label}
-                </Label>
-              </div>
+                <span className="text-sm font-medium">{sector.label}</span>
+              </label>
             ))}
           </div>
         </div>
 
-        {/* Location Preferences */}
-        <div className="space-y-4">
-          <Label className="text-sm font-medium text-foreground">
-            {t.locationPreferences}
-          </Label>
-          <RadioGroup 
-            value={locationPreference} 
-            onValueChange={handleLocationPreferenceChange}
-            className="flex flex-col md:flex-row gap-6"
-          >
-            <div className="flex items-center space-x-3">
-              <RadioGroupItem value="any" id="any-location" />
-              <Label htmlFor="any-location" className="text-sm text-foreground cursor-pointer">
-                {t.anyLocation}
-              </Label>
-            </div>
-            <div className="flex items-center space-x-3">
-              <RadioGroupItem value="remote" id="remote-work" />
-              <Label htmlFor="remote-work" className="text-sm text-foreground cursor-pointer">
-                {t.remoteWork}
-              </Label>
-            </div>
-            <div className="flex items-center space-x-3">
-              <RadioGroupItem value="specific" id="specific-locations" />
-              <Label htmlFor="specific-locations" className="text-sm text-foreground cursor-pointer">
-                {t.specificLocations}
-              </Label>
-            </div>
-          </RadioGroup>
+        {/* Location */}
+        <div>
+          <p className="text-sm font-medium text-gray-700 mb-3">{t.locationPreferences}</p>
+          <div className="grid grid-cols-1 gap-2">
+            {[{value: 'any', label: t.anyLocation}, {value: 'remote', label: t.remoteWork}, {value: 'specific', label: t.specificLocations}].map((option) => (
+              <label
+                key={option.value}
+                className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-colors ${
+                  locationPreference === option.value
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="location"
+                  value={option.value}
+                  checked={locationPreference === option.value}
+                  onChange={(e) => handleLocationPreferenceChange(e.target.value)}
+                  className="sr-only"
+                />
+                <span className="text-sm font-medium">{option.label}</span>
+              </label>
+            ))}
+          </div>
           
+          {/* Specific Locations Selection */}
           {locationPreference === 'specific' && (
-            <div className="text-sm text-muted-foreground bg-muted/30 p-3 rounded-md">
-              {t.specificLocationsHint}
+            <div className="mt-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  type="text"
+                  placeholder={t.locationsPlaceholder}
+                  value={locationsSearch}
+                  onChange={(e) => {
+                    setLocationsSearch(e.target.value);
+                    setShowLocationsDropdown(e.target.value.length > 0);
+                  }}
+                  onFocus={() => setShowLocationsDropdown(locationsSearch.length > 0)}
+                  className="h-12 pl-10 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  data-testid="input-locations-search"
+                />
+                
+                {/* Locations Dropdown */}
+                {showLocationsDropdown && filteredLocations.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-40 overflow-y-auto mt-1">
+                    {filteredLocations.slice(0, 10).map((location) => (
+                      <button
+                        key={location}
+                        onClick={() => handleLocationAdd(location)}
+                        className="w-full px-4 py-3 text-left hover:bg-gray-50 text-sm border-b border-gray-100 last:border-0"
+                        data-testid={`option-location-${location.toLowerCase().replace(/\s+/g, '-')}`}
+                      >
+                        {location}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              {/* Selected Locations */}
+              {formData.locations.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {formData.locations.map((location) => (
+                    <span
+                      key={location}
+                      className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                      data-testid={`selected-location-${location.toLowerCase().replace(/\s+/g, '-')}`}
+                    >
+                      {location}
+                      <button
+                        onClick={() => handleLocationRemove(location)}
+                        className="hover:bg-green-200 rounded-full p-0.5"
+                        data-testid={`remove-location-${location.toLowerCase().replace(/\s+/g, '-')}`}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
 
         {/* Submit Button */}
-        <div className="pt-4">
+        <div className="pt-2">
           <Button
             onClick={handleSubmit}
             disabled={!isFormValid()}
-            className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium text-base"
+            className={`w-full h-12 font-medium text-base rounded-lg transition-colors ${
+              isFormValid() 
+                ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+            }`}
             data-testid="button-find-matches"
           >
             {t.findMyMatches}
