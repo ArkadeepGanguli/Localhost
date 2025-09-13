@@ -105,10 +105,10 @@
   }
   
   .skill-match {
-    @apply bg-primary/10 text-primary text-xs px-2 py-1 rounded;
+    @apply bg-primary bg-opacity-10 text-primary text-xs px-2 py-1 rounded;
   }
   
   .skill-no-match {
-    @apply bg-muted/60 text-muted-foreground text-xs px-2 py-1 rounded;
+    @apply bg-muted bg-opacity-60 text-muted-foreground text-xs px-2 py-1 rounded;
   }
 }
