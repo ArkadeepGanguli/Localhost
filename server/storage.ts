@@ -59,7 +59,11 @@ export class MemStorage implements IStorage {
 
   async createCandidate(insertCandidate: InsertCandidate): Promise<Candidate> {
     const id = randomUUID();
-    const candidate: Candidate = { ...insertCandidate, id };
+    const candidate: Candidate = { 
+      ...insertCandidate, 
+      id,
+      language: insertCandidate.language ?? null
+    };
     this.candidates.set(id, candidate);
     return candidate;
   }
@@ -70,7 +74,14 @@ export class MemStorage implements IStorage {
 
   async createInternship(insertInternship: InsertInternship): Promise<Internship> {
     const id = randomUUID();
-    const internship: Internship = { ...insertInternship, id };
+    const internship: Internship = { 
+      ...insertInternship, 
+      id,
+      salary: insertInternship.salary ?? null,
+      description: insertInternship.description ?? null,
+      sector: insertInternship.sector ?? null,
+      applyLink: insertInternship.applyLink ?? null
+    };
     this.internships.set(id, internship);
     return internship;
   }
