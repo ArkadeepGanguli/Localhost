@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(210, 40%, 98%);
+  --foreground: hsl(222.2, 84%, 4.9%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(222.2, 84%, 4.9%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(222.2, 84%, 4.9%);
+  --primary: hsl(210, 83%, 53%);
+  --primary-foreground: hsl(210, 40%, 98%);
+  --secondary: hsl(187, 71%, 38%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(210, 40%, 96%);
+  --muted-foreground: hsl(215.4, 16.3%, 46.9%);
+  --accent: hsl(123, 38%, 57%);
+  --accent-foreground: hsl(0, 0%, 100%);
+  --destructive: hsl(0, 62%, 60%);
+  --destructive-foreground: hsl(210, 40%, 98%);
+  --border: hsl(214.3, 31.8%, 91.4%);
+  --input: hsl(214.3, 31.8%, 91.4%);
+  --ring: hsl(210, 83%, 53%);
+  --chart-1: hsl(210, 83%, 53%);
+  --chart-2: hsl(159.7826, 100%, 36.0784%);
+  --chart-3: hsl(42.0290, 92.8251%, 56.2745%);
+  --chart-4: hsl(147.1429, 78.5047%, 41.9608%);
+  --chart-5: hsl(341.4894, 75.2000%, 50.9804%);
+  --sidebar: hsl(180, 6.6667%, 97.0588%);
+  --sidebar-foreground: hsl(210, 25%, 7.8431%);
+  --sidebar-primary: hsl(210, 83%, 53%);
+  --sidebar-primary-foreground: hsl(210, 40%, 98%);
+  --sidebar-accent: hsl(211.5789, 51.3514%, 92.7451%);
+  --sidebar-accent-foreground: hsl(210, 83%, 53%);
+  --sidebar-border: hsl(205.0000, 25.0000%, 90.5882%);
+  --sidebar-ring: hsl(210, 83%, 53%);
+  --font-sans: 'Roboto', system-ui, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 0.5rem;
+  --shadow-2xs: 0px 2px 0px 0px hsl(210, 83%, 53% / 0.00);
+  --shadow-xs: 0px 2px 0px 0px hsl(210, 83%, 53% / 0.00);
+  --shadow-sm: 0px 2px 0px 0px hsl(210, 83%, 53% / 0.00), 0px 1px 2px -1px hsl(210, 83%, 53% / 0.00);
+  --shadow: 0px 2px 0px 0px hsl(210, 83%, 53% / 0.00), 0px 1px 2px -1px hsl(210, 83%, 53% / 0.00);
+  --shadow-md: 0px 2px 0px 0px hsl(210, 83%, 53% / 0.00), 0px 2px 4px -1px hsl(210, 83%, 53% / 0.00);
+  --shadow-lg: 0px 2px 0px 0px hsl(210, 83%, 53% / 0.00), 0px 4px 6px -1px hsl(210, 83%, 53% / 0.00);
+  --shadow-xl: 0px 2px 0px 0px hsl(210, 83%, 53% / 0.00), 0px 8px 10px -1px hsl(210, 83%, 53% / 0.00);
+  --shadow-2xl: 0px 2px 0px 0px hsl(210, 83%, 53% / 0.00);
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+}
+
+.dark {
+  --background: hsl(222.2, 84%, 4.9%);
+  --foreground: hsl(210, 40%, 98%);
+  --card: hsl(222.2, 84%, 4.9%);
+  --card-foreground: hsl(210, 40%, 98%);
+  --popover: hsl(222.2, 84%, 4.9%);
+  --popover-foreground: hsl(210, 40%, 98%);
+  --primary: hsl(210, 83%, 53%);
+  --primary-foreground: hsl(222.2, 84%, 4.9%);
+  --secondary: hsl(217.2, 32.6%, 17.5%);
+  --secondary-foreground: hsl(210, 40%, 98%);
+  --muted: hsl(217.2, 32.6%, 17.5%);
+  --muted-foreground: hsl(215, 20.2%, 65.1%);
+  --accent: hsl(217.2, 32.6%, 17.5%);
+  --accent-foreground: hsl(210, 40%, 98%);
+  --border: hsl(217.2, 32.6%, 17.5%);
+  --input: hsl(217.2, 32.6%, 17.5%);
+  --ring: hsl(212.7, 26.8%, 83.9%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Roboto', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .form-step {
+    @apply transition-all duration-300;
+  }
+  
+  .skill-tag {
+    @apply bg-primary text-primary-foreground text-sm px-3 py-1 rounded-full flex items-center;
+  }
+  
+  .location-tag {
+    @apply bg-primary text-primary-foreground text-sm px-3 py-1 rounded-full flex items-center;
+  }
+  
+  .match-card {
+    @apply bg-card rounded-lg shadow-sm border hover:shadow-md transition-shadow;
+  }
+  
+  .match-percentage {
+    @apply bg-accent text-accent-foreground text-sm px-2 py-1 rounded-full font-medium;
+  }
+  
+  .skill-match {
+    @apply bg-primary/10 text-primary text-xs px-2 py-1 rounded;
+  }
+  
+  .skill-no-match {
+    @apply bg-muted/60 text-muted-foreground text-xs px-2 py-1 rounded;
+  }
+}
