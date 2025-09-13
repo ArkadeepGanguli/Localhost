@@ -40,12 +40,12 @@ export default function CandidateForm({ onSubmit, language, onBack }: CandidateF
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
 
   // Fetch available skills
-  const { data: skillsData } = useQuery({
+  const { data: skillsData } = useQuery<{ skills: string[] }>({
     queryKey: ['/api/skills'],
   });
 
   // Fetch available locations  
-  const { data: locationsData } = useQuery({
+  const { data: locationsData } = useQuery<{ locations: string[] }>({
     queryKey: ['/api/locations'],
   });
 
