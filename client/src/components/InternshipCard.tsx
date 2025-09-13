@@ -41,10 +41,15 @@ export default function InternshipCard({ match, language }: InternshipCardProps)
       <CardContent className="p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
-            <div className="flex items-center space-x-3 mb-2">
-              <h3 className="text-lg font-semibold text-foreground" data-testid={`text-title-${internship.id}`}>
+            <div className="mb-2">
+              <h3 className="text-lg font-semibold text-foreground mb-1" data-testid={`text-title-${internship.id}`}>
                 {internship.title}
               </h3>
+              <p className="text-sm font-medium text-muted-foreground" data-testid={`text-company-${internship.id}`}>
+                {internship.company}
+              </p>
+            </div>
+            <div className="flex items-center space-x-3 mb-2">
               <Badge 
                 className={`${getMatchPercentageColor(matchPercentage)} text-sm px-2 py-1 rounded-full font-medium`}
                 data-testid={`text-match-percentage-${internship.id}`}

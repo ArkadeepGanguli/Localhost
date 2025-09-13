@@ -31,10 +31,12 @@ export class MatchingService {
       }
     }
     
-    // Sort by match percentage descending and return top 5
-    return matches
-      .sort((a, b) => b.matchPercentage - a.matchPercentage)
-      .slice(0, 5);
+    // Sort by match percentage descending and return at least 5 matches
+    const sortedMatches = matches
+      .sort((a, b) => b.matchPercentage - a.matchPercentage);
+    
+    // Return at least 5 matches, more if available and high quality
+    return sortedMatches.slice(0, Math.max(5, sortedMatches.length));
   }
 
   private calculateBasicMatch(candidate: Candidate, internship: Internship): { matchPercentage: number; explanation: string } {
