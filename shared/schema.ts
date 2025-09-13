@@ -11,6 +11,8 @@ export const users = pgTable("users", {
 
 export const candidates = pgTable("candidates", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  fullName: text("full_name").notNull(),
+  email: text("email").notNull(),
   education: text("education").notNull(),
   skills: text("skills").array().notNull(),
   sectors: text("sectors").array().notNull(),
@@ -44,6 +46,8 @@ export const insertUserSchema = createInsertSchema(users).pick({
 });
 
 export const insertCandidateSchema = createInsertSchema(candidates).pick({
+  fullName: true,
+  email: true,
   education: true,
   skills: true,
   sectors: true,
@@ -76,6 +80,8 @@ export type InternshipMatch = {
 };
 
 export type CandidateFormData = {
+  fullName: string;
+  email: string;
   education: string;
   skills: string[];
   sectors: string[];
