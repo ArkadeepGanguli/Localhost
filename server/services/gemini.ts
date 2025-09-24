@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { type Candidate, type Internship, type InternshipMatch } from "@shared/schema";
 
 const ai = new GoogleGenAI({ 
-  apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY || "AIzaSyDDGjL3v0zdZLmu4VYLi7iqZ8SZv13gszY" 
+  apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY || "" 
 });
 
 export interface InternshipMatchResult {
@@ -241,7 +241,7 @@ Internship Opportunities:${internshipList}
 Analyze and rank these internships for the candidate.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
       config: {
         systemInstruction: systemPrompt,
         responseMimeType: "application/json",

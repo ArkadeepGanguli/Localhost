@@ -64,9 +64,14 @@ export class MatchingService {
     
     // Location matching (30% weight)
     const locationWeight = 30;
-    const locationMatch = candidate.locations.includes(internship.location) || 
-                         internship.location === "Remote" ||
-                         candidate.locations.includes("Remote");
+    // Rules align with server filter: Any Location => always match; Remote only => only Remote; Specific => exact city match
+    const wantsAny = candidate.locations.includes('Any Location');
+    const wantsOnlyRemote = candidate.locations.length === 1 && candidate.locations[0] === 'Remote';
+    const locationMatch = wantsAny
+      ? true
+      : wantsOnlyRemote
+        ? internship.location === 'Remote'
+        : candidate.locations.includes(internship.location);
     const locationScore = locationMatch ? locationWeight : 0;
     totalScore += locationScore;
     maxScore += locationWeight;

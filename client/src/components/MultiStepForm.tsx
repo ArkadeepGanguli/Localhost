@@ -36,6 +36,10 @@ export default function MultiStepForm({ onSubmit, language, onBack }: MultiStepF
   const [showSkillsDropdown, setShowSkillsDropdown] = useState(false);
   const [highlightedSkillIndex, setHighlightedSkillIndex] = useState(0);
   const skillsInputRef = useRef<HTMLInputElement>(null);
+  const [locationsSearch, setLocationsSearch] = useState('');
+  const [showLocationsDropdown, setShowLocationsDropdown] = useState(false);
+  const [highlightedLocationIndex, setHighlightedLocationIndex] = useState(0);
+  const locationsInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch available skills
   const { data: skillsData } = useQuery<{ skills: string[] }>({
@@ -53,6 +57,10 @@ export default function MultiStepForm({ onSubmit, language, onBack }: MultiStepF
   const filteredSkills = availableSkills.filter((skill: string) =>
     skill.toLowerCase().includes(skillsSearch.toLowerCase()) &&
     !formData.skills.includes(skill)
+  );
+  const filteredLocations = availableLocations.filter((location: string) =>
+    location.toLowerCase().includes(locationsSearch.toLowerCase()) &&
+    !formData.locations.includes(location)
   );
 
   const translations = {
@@ -72,6 +80,7 @@ export default function MultiStepForm({ onSubmit, language, onBack }: MultiStepF
       anyLocation: "Any Location",
       remoteWork: "Remote Work", 
       specificLocations: "Specific Locations",
+  locationsPlaceholder: "Search and select locations...",
       findMyMatches: "Find My Matches",
       next: "Next",
       back: "Back",
@@ -107,6 +116,7 @@ export default function MultiStepForm({ onSubmit, language, onBack }: MultiStepF
       anyLocation: "कोई भी स्थान",
       remoteWork: "रिमोट वर्क",
       specificLocations: "विशिष्ट स्थान",
+  locationsPlaceholder: "स्थान खोजें और चुनें...",
       findMyMatches: "मेरे मैच खोजें",
       next: "अगला",
       back: "वापस",
@@ -209,6 +219,8 @@ export default function MultiStepForm({ onSubmit, language, onBack }: MultiStepF
       locations = ['Any Location'];
     } else if (value === 'remote') {
       locations = ['Remote'];
+    } else if (value === 'specific') {
+      locations = [];
     }
     // For specific locations, keep current selections or empty array
     
@@ -216,6 +228,54 @@ export default function MultiStepForm({ onSubmit, language, onBack }: MultiStepF
       ...prev,
       locations
     }));
+  };
+
+  const handleLocationAdd = (location: string) => {
+    if (!formData.locations.includes(location)) {
+      setFormData(prev => ({
+        ...prev,
+        locations: [...prev.locations, location]
+      }));
+    }
+    setLocationsSearch('');
+    setShowLocationsDropdown(false);
+    setHighlightedLocationIndex(0);
+  };
+
+  const handleLocationRemove = (locationToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      locations: prev.locations.filter(loc => loc !== locationToRemove)
+    }));
+  };
+
+  const handleLocationKeyDown = (e: React.KeyboardEvent) => {
+    if (!showLocationsDropdown || filteredLocations.length === 0) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setHighlightedLocationIndex(prev =>
+          prev < filteredLocations.length - 1 ? prev + 1 : 0
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setHighlightedLocationIndex(prev =>
+          prev > 0 ? prev - 1 : filteredLocations.length - 1
+        );
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (filteredLocations[highlightedLocationIndex]) {
+          handleLocationAdd(filteredLocations[highlightedLocationIndex]);
+        }
+        break;
+      case 'Escape':
+        setShowLocationsDropdown(false);
+        setHighlightedLocationIndex(0);
+        break;
+    }
   };
 
   const isStep1Valid = () => {
@@ -229,7 +289,10 @@ export default function MultiStepForm({ onSubmit, language, onBack }: MultiStepF
   };
 
   const isStep2Valid = () => {
-    return locationPreference !== '' && formData.locations.length > 0;
+    if (locationPreference === 'any') return true;
+    if (locationPreference === 'remote') return true;
+    if (locationPreference === 'specific') return formData.locations.length > 0;
+    return false;
   };
 
   const handleNext = () => {
@@ -503,10 +566,64 @@ export default function MultiStepForm({ onSubmit, language, onBack }: MultiStepF
               </div>
               
               {locationPreference === 'specific' && (
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-blue-700">
-                    Select 'Specific Locations' to choose cities.
-                  </p>
+                <div className="mt-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      ref={locationsInputRef}
+                      type="text"
+                      placeholder={t.locationsPlaceholder}
+                      value={locationsSearch}
+                      onChange={(e) => {
+                        setLocationsSearch(e.target.value);
+                        setShowLocationsDropdown(e.target.value.length > 0);
+                        setHighlightedLocationIndex(0);
+                      }}
+                      onFocus={() => setShowLocationsDropdown(locationsSearch.length > 0)}
+                      onBlur={() => setTimeout(() => setShowLocationsDropdown(false), 200)}
+                      onKeyDown={handleLocationKeyDown}
+                      className="h-12 pl-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      data-testid="input-locations-search"
+                    />
+
+                    {showLocationsDropdown && filteredLocations.length > 0 && (
+                      <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-56 overflow-y-auto mt-1">
+                        {filteredLocations.slice(0, 12).map((location, index) => (
+                          <button
+                            key={location}
+                            onClick={() => handleLocationAdd(location)}
+                            className={`w-full px-4 py-3 text-left hover:bg-gray-50 text-sm border-b border-gray-100 last:border-0 ${
+                              index === highlightedLocationIndex ? 'bg-yellow-100' : ''
+                            }`}
+                            data-testid={`option-location-${location.toLowerCase().replace(/\s+/g, '-')}`}
+                          >
+                            {location}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {formData.locations.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {formData.locations.map((location) => (
+                        <span
+                          key={location}
+                          className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                          data-testid={`selected-location-${location.toLowerCase().replace(/\s+/g, '-')}`}
+                        >
+                          {location}
+                          <button
+                            onClick={() => handleLocationRemove(location)}
+                            className="hover:bg-green-200 rounded-full p-0.5"
+                            data-testid={`remove-location-${location.toLowerCase().replace(/\s+/g, '-')}`}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
