@@ -19,7 +19,7 @@ Our solution bridges this gap by providing a **guided, skill-based internship re
 
 ## 🛠️ Tech Stack  
 - **Frontend:** Vite + React + TailwindCSS  
-- **Backend:** Node.js (Express/Nest)  
+- **Backend:** Node.js (Express)  
 - **Shared:** TypeScript models and utilities  
 - **Database:** .csv files in attached_assets folder  
 - **AI / ML:** Google **Gemini API** for intelligent matching and recommendations  
@@ -37,11 +37,12 @@ cd Localhost
 ```bash
 npm install
 ```
-### 3. Create a .env file
+### 3. Setup Environment Variable
+Copy .env.example to .env and add your Gemini API Key
 ```bash
 GEMINI_API_KEY="your_gemini_api_key"
 ```
-### 4. Run the project
+### 4. Run the Project
 ```bash
 npm run dev
 ```
