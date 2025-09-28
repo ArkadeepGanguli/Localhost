@@ -13,7 +13,6 @@ Our solution bridges this gap by providing a **guided, skill-based internship re
 - 📱 **Mobile-First Design** – Optimized for smartphones.  
 - 🌍 **Remote-Friendly Opportunities** – Highlighting flexible internships.  
 - 🧭 **Simple Guided Interface** – Built for candidates with limited digital literacy.  
-- 📊 **Data-Driven Insights** – Helps policymakers understand internship trends and reach.  
 
 ---
 
@@ -21,7 +20,7 @@ Our solution bridges this gap by providing a **guided, skill-based internship re
 - **Frontend:** Vite + React + TailwindCSS  
 - **Backend:** Node.js (Express)  
 - **Shared:** TypeScript models and utilities  
-- **Database:** .csv files in attached_assets folder  
+- **Database:** .csv files in attached_assets folder (for MVP), scalable to MongoDB / MySQL / PostgreSQL  
 - **AI / ML:** Google **Gemini API** for intelligent matching and recommendations  
 
 ---
@@ -47,7 +46,7 @@ GEMINI_API_KEY="your_gemini_api_key"
 npm run dev
 ```
 ## 🎥 Demo  
-🔗 [Watch the Demo on YouTube](https://youtu.be/yk5kbDTYggU)  
+🔗 [Watch the Demo on YouTube](https://youtu.be/9zSyP9khRTc)  
  
 
 ---
